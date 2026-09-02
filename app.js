@@ -376,12 +376,14 @@
   }
   function renderResourceDock(){
     const g=god(),rMax=resourceMax(),band=sanityBand();
-    return `<section class="status-resource-panel">
-      ${resourceAdjustBox('hp','HP',state.currentHp,hpMax(),[-5,-1,1,5],'status')}
-      ${resourceAdjustBox('en','Energia',state.currentEnergy,energyMax(),[-20,20],'status')}
-      ${resourceAdjustBox('san','Sanidade',state.currentSanity,100,[-5,5],'status',true)}
-      <div class="resource-chip cast-chip"><span>Conjuração</span><strong>${signed(castAttack())} / DT ${castDT()}</strong><small>${attrName(g.casting)}</small></div>
-      ${g.resource?`<div class="resource-chip"><div class="row between"><span>${g.resource.name}</span><strong>${state.resourceCurrent}/${rMax}</strong></div><div class="progress"><i style="width:${rMax?state.resourceCurrent/rMax*100:0}%"></i></div><div class="mini-actions"><button type="button" data-resource="-1">−1</button><button type="button" data-resource="1">+1</button></div><div class="resource-manual"><input id="status-specialManual" data-resource-manual-input="resource" type="number" step="1" placeholder="Ex.: -2 ou 3"><button type="button" data-manual-resource="resource" data-manual-input="status-specialManual">Aplicar</button></div></div>`:''}
+    const core=(kind,label,current,max,extra='')=>{const inputId=`status-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="core-stat core-${kind}"><div class="core-stat-label">${label}</div><div class="core-stat-value">${current}<small>/${max}</small></div><div class="core-stat-meter"><i style="width:${ratio}%"></i></div>${extra}<div class="core-stat-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
+    return `<section class="status-core-strip">
+      ${core('hp','HP',state.currentHp,hpMax())}
+      ${core('san','Sanidade',state.currentSanity,100,`<div class="core-stat-caption">${band.name}</div>`)}
+      <div class="core-stat core-defense"><div class="core-stat-label">Defesa</div><div class="core-stat-value">${signed(defenseBonus())}</div><div class="core-stat-caption">1d20 ${signed(defenseBonus())}</div><div class="core-stat-caption muted-mini">DES + equipamento</div></div>
+      ${core('en','Energia',state.currentEnergy,energyMax())}
+      ${g.resource?core('resource',g.resource.name,state.resourceCurrent,rMax,`<div class="core-stat-caption">Acúmulo</div>`):''}
+      <div class="core-stat core-cast"><div class="core-stat-label">Conjuração</div><div class="core-stat-value">${signed(castAttack())}</div><div class="core-stat-caption">DT ${castDT()} · ${attrName(g.casting)}</div></div>
     </section>`;
   }
   function renderCombatResourceDock(){
@@ -667,7 +669,7 @@
           <div class="sheet-hero-portrait-wrap"><button id="heroPortraitUploadBtn" class="ghost portrait-upload-chip" type="button">trocar retrato</button><div class="sheet-hero-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div></div>
           <div class="sheet-hero-copy"><p class="eyebrow">SCUTUM · PERFIL DO PERSONAGEM</p><div class="big-name">${esc(state.name||'Sem nome')}</div><p class="sheet-hero-tagline">${esc(heroTagline)}</p><p class="muted">${heroMeta}</p><div class="hero-pills"><span class="pill">${GROUP_LABEL[g.group]||g.group}</span><span class="pill">Conjuração ${attrName(g.casting)}</span><span class="pill">Tema padrão</span>${state.player?`<span class="pill">Player ${esc(state.player)}</span>`:''}</div></div>
         </div>
-        <button id="backCreation" class="ghost hero-back">Voltar à criação</button>
+        <div class="hero-side-controls"><div class="hero-level-badge"><span>NÍVEL</span><strong>${state.level}</strong><small>BP +${bp()}</small></div><button id="backCreation" class="ghost hero-back">Voltar à criação</button></div>
       </div>
       ${renderTabs()}
       ${renderStatusTab(g)}
@@ -696,9 +698,10 @@
   }
   function sourceOption(value,label,current){return `<option value="${value}" ${current===value?'selected':''}>${label}</option>`}
   function renderSkillMatrix(){
-    return `<article class="card wide"><div class="row between"><div><h3>Todas as perícias</h3><p class="muted compact">O valor de rolagem aparece mesmo sem treinamento. Perito soma BP; Expertise soma o BP duas vezes.</p></div><span class="pill">BP +${bp()}</span></div><div class="skill-matrix">${skills.map(sk=>{
+    return `<article class="card wide skills-ledger-card"><div class="row between skills-ledger-head"><div><h3>Todas as perícias</h3><p class="muted compact">Rolagem sempre visível · Perito soma BP · Expertise soma BP duas vezes.</p></div><span class="pill">BP +${bp()}</span></div><div class="skill-ledger">${skills.map(sk=>{
       const automatic=automaticSkillSources(sk.name),meta=skillMetaFor(sk.name),trained=skillIsProficient(sk.name),expert=skillHasExpertise(sk.name),sources=skillSources(sk.name),fixed=god()?.skillBonuses?.[sk.name]||0;
-      return `<div class="skill-matrix-row ${trained?'trained':''} ${expert?'expert':''}"><div class="skill-main"><div class="skill-identity"><b>${sk.name}</b><small>${attrName(sk.attr)}${fixed?` · kit ${signed(fixed)}`:''}</small></div><div class="skill-roll"><span>Rolagem</span><strong>1d20 ${signed(skillValue(sk.name))}</strong></div></div><label class="skill-toggle"><input type="checkbox" data-skill-manual="${esc(sk.name)}" ${trained?'checked':''} ${automatic.length?'disabled':''}><span>Perito</span></label><label class="skill-toggle"><input type="checkbox" data-skill-expertise="${esc(sk.name)}" ${expert?'checked':''} ${trained?'':'disabled'}><span>Expertise</span></label><div class="skill-source"><span class="label">Fonte</span>${automatic.length?`<div class="skill-source-auto">${sources.map(x=>`<span class="pill good">${x}</span>`).join('')}</div>`:`<select data-skill-source="${esc(sk.name)}" ${meta.proficient?'':'disabled'}>${sourceOption('prole','Prole',meta.source)}${sourceOption('inicial','Inicial',meta.source)}${sourceOption('treino','Treino',meta.source)}${sourceOption('nivel-20','Nível 20',meta.source)}${sourceOption('nivel-40','Nível 40',meta.source)}${sourceOption('talento','Talento',meta.source)}${sourceOption('extras','Extras',meta.source)}</select>`}<input data-skill-detail="${esc(sk.name)}" value="${esc(meta.detail||'')}" placeholder="Detalhe da origem, se quiser"></div></div>`;
+      const sourceHtml=automatic.length?`<div class="skill-source-tags">${sources.map(x=>`<span class="skill-source-tag">${x}</span>`).join('')}</div>`:`<select class="skill-source-select" data-skill-source="${esc(sk.name)}" ${meta.proficient?'':'disabled'}>${sourceOption('prole','Prole',meta.source)}${sourceOption('inicial','Inicial',meta.source)}${sourceOption('treino','Treino',meta.source)}${sourceOption('nivel-20','Nível 20',meta.source)}${sourceOption('nivel-40','Nível 40',meta.source)}${sourceOption('talento','Talento',meta.source)}${sourceOption('extras','Extras',meta.source)}</select>`;
+      return `<div class="skill-ledger-row ${trained?'trained':''} ${expert?'expert':''}"><div class="skill-ledger-name"><b>${sk.name}</b><small>${attrName(sk.attr)}${fixed?` · kit ${signed(fixed)}`:''}</small></div><div class="skill-ledger-roll"><small>Rolagem</small><strong>1d20 ${signed(skillValue(sk.name))}</strong></div><div class="skill-ledger-toggles"><label class="skill-mini-toggle ${trained?'active':''}"><input type="checkbox" data-skill-manual="${esc(sk.name)}" ${trained?'checked':''} ${automatic.length?'disabled':''}><span>Perito</span></label><label class="skill-mini-toggle ${expert?'active expert':''}"><input type="checkbox" data-skill-expertise="${esc(sk.name)}" ${expert?'checked':''} ${trained?'':'disabled'}><span>Expertise</span></label></div><div class="skill-ledger-source"><small>Fonte</small>${sourceHtml}</div><input class="skill-detail-inline" data-skill-detail="${esc(sk.name)}" value="${esc(meta.detail||'')}" placeholder="Detalhe da origem"></div>`;
     }).join('')}</div></article>`;
   }
 
