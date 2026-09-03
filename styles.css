@@ -961,3 +961,116 @@ footer{padding-top:16px;color:#655b5e;font-size:9px}
   .overview-grid{grid-template-columns:148px minmax(500px,1.95fr) minmax(225px,.86fr) minmax(205px,.76fr)}
   .skill-ledger{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* Etapa 4.2 — perícias ultracompactas, atributos editáveis e imagens no inventário */
+.skill-ledger{gap:3px}
+.skill-ledger-row{padding:3px 5px;min-height:33px}
+.skill-row-main{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:5px;align-items:center;min-height:25px}
+.skill-ledger-flags{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.skill-tiny-check{display:inline-flex;align-items:center;gap:1px;margin:0;padding:0;color:#74696d;font-size:6px;font-weight:900;line-height:1;cursor:pointer}
+.skill-tiny-check input{width:9px;height:9px;min-width:9px;margin:0;padding:0;accent-color:var(--red-bright);box-shadow:none}
+.skill-tiny-check span{font-size:6px;line-height:1}.skill-tiny-check.active{color:#f2c9cf}.skill-tiny-check.expert.active{color:#e2c27f}
+.skill-ledger-name{min-width:0;display:flex;flex-direction:column;gap:1px}.skill-ledger-name b{font:700 10.5px/1 var(--serif)}.skill-ledger-name small{font-size:6px;line-height:1.05;letter-spacing:.04em}
+.skill-roll-value{font:700 12px/1 var(--serif);min-width:23px;text-align:right}
+.skill-settings{margin:0;min-width:18px}.skill-settings summary{font-size:7px;letter-spacing:.05em;text-align:center;padding:2px;line-height:1;cursor:pointer;color:#695e62}.skill-settings[open]{grid-column:1/-1;width:100%;margin:3px 0 0;padding-top:4px;border-top:1px solid #2b2225}.skill-settings-body{display:grid;grid-template-columns:1fr;gap:3px}.skill-source-select,.skill-detail-inline{min-height:22px;padding:2px 22px 2px 5px;font-size:7px}.skill-detail-inline{padding-right:5px}.skill-source-tag{font-size:6px;padding:1px 3px}.mini-help{font-size:6px;margin-top:5px}
+.vertical-attrs .attr{min-height:52px;padding:5px 7px}.vertical-attrs .attr-total{font-size:25px}.vertical-attrs .attr-break{font-size:6.5px}.vertical-attrs .stepper{margin-top:2px;gap:3px}.vertical-attrs .stepper button{padding:0 5px;min-height:18px;font-size:10px}.vertical-attrs .stepper .base{font-size:8px;min-width:15px;text-align:center}
+.rail-defense-stat{position:relative}.rail-defense-adjust{display:flex!important;align-items:center;justify-content:center;gap:2px;margin-top:3px;color:#776b6f!important;font-size:6px!important;letter-spacing:.04em!important;text-transform:uppercase}.rail-defense-adjust input{width:30px;min-height:16px;height:16px;padding:0 2px;text-align:center;font-size:8px;border-color:#382a2d;background:#050505}
+
+/* Imagens ficam dentro do próprio save e aparecem no baralho. */
+.equipment-card-media{height:66px;margin:12px 0 7px;border:1px solid #392b2f;background:#050505;overflow:hidden;position:relative}
+.equipment-card-media::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 20px rgba(0,0,0,.22);pointer-events:none}
+.equipment-card-media img{display:block;width:100%;height:100%;object-fit:cover}
+.equipment-card:has(.equipment-card-media){min-height:205px}.equipment-card.item::before{background:#b9975f}.equipment-card.item .equipment-card-copy small{color:#d7b77e}
+.inventory-item-head,.equipment-editor-head,.weapon-editor-head{display:grid;grid-template-columns:78px minmax(0,1fr);gap:9px;align-items:start;margin-bottom:9px}
+.inventory-item-title,.equipment-editor-fields,.weapon-editor-fields{min-width:0}.inventory-image-preview{width:78px;height:78px;display:grid;place-items:center;border:1px dashed #47363a;background:#050505;color:#6f6367;font-size:8px;text-transform:uppercase;letter-spacing:.06em;overflow:hidden}.inventory-image-preview.has-image{border-style:solid;border-color:#594047}.inventory-image-preview img{width:100%;height:100%;object-fit:cover}.inventory-image-actions{margin-top:5px;gap:4px;flex-wrap:wrap}.inventory-image-actions button{padding:4px 6px;font-size:8px}.inventory-image-actions .toggle-inline{font-size:8px;padding:3px 5px;border:1px solid #35282b;background:#080808;border-radius:4px}
+.inventory-item{transition:border-color .15s ease,box-shadow .15s ease}.inventory-item:has([data-item-deck]:checked){border-color:#76502e;box-shadow:inset 2px 0 0 #b9975f}.equipment-editor-card .inventory-image-preview,.weapon-card .inventory-image-preview{width:72px;height:72px}.equipment-editor-head,.weapon-editor-head{grid-template-columns:72px minmax(0,1fr)}
+
+@media(max-width:620px){
+  .skill-row-main{grid-template-columns:auto minmax(0,1fr) auto auto}.skill-ledger-name b{font-size:11px}
+  .inventory-item-head,.equipment-editor-head,.weapon-editor-head{grid-template-columns:64px minmax(0,1fr)}.inventory-image-preview,.equipment-editor-card .inventory-image-preview,.weapon-card .inventory-image-preview{width:64px;height:64px}
+  .equipment-card:has(.equipment-card-media){min-height:180px}.equipment-card-media{height:58px}
+}
+
+/* Etapa 4.2b — perícias em densidade de ficha impressa */
+.skill-ledger-row{min-height:28px;padding:2px 4px}
+.skill-ledger-row:not(:has(.skill-settings[open])){height:28px}
+.skill-row-main{min-height:22px;gap:4px}
+.skill-ledger-name b{font-size:10px}
+.skill-ledger-name small{font-size:5.5px}
+.skill-roll-value{font-size:11px}
+.skill-settings summary{padding:1px;line-height:1}
+.skill-tiny-check input{width:8px;height:8px;min-width:8px}
+.skill-tiny-check span{font-size:5.5px}
+
+
+/* Etapa 4.3 — revisão real: perícias densas, talentos visíveis e logo local */
+.brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}
+.legion-brand-icon{display:grid;place-items:center;overflow:hidden;background:#0a0708}
+.legion-brand-icon img{width:100%;height:100%;object-fit:contain;background:#0a0708}
+
+.overview-grid{grid-template-columns:142px minmax(540px,2.15fr) minmax(265px,.95fr) minmax(210px,.82fr)}
+.skills-ledger-card{padding:9px}
+.skills-ledger-head{margin-bottom:5px}
+.skill-ledger{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;border:0}
+.skill-ledger-row{display:block;min-height:26px;height:auto;padding:2px 4px;border:1px solid #2a2224;border-left:2px solid #32292c;background:#060606;border-radius:3px;box-shadow:none}
+.skill-ledger-row:not(:has(.skill-settings[open])){min-height:26px}
+.skill-ledger-row:hover{transform:none;background:#0a0909;border-color:#473236}
+.skill-ledger-row.trained{border-left-color:#e11d34;background:linear-gradient(90deg,rgba(225,29,52,.08),#060606 38%)}
+.skill-ledger-row.expert{border-left-color:var(--gold)}
+.skill-row-main{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:3px;align-items:center;min-height:20px}
+.skill-ledger-flags{display:flex;align-items:center;gap:2px}
+.skill-tiny-check{gap:1px;font-size:5px;color:#786c70}
+.skill-tiny-check input{width:8px;height:8px;min-width:8px}
+.skill-tiny-check span{font-size:5px;line-height:1}
+.skill-ledger-name{gap:0;min-width:0}
+.skill-ledger-name b{font:700 10px/1 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-ledger-name small{font-size:5.5px;line-height:1;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-roll-value{font:700 11px/1 var(--serif);min-width:24px;color:#f5eef0;text-align:right}
+.skill-settings{margin:0;min-width:14px}
+.skill-settings summary{font-size:6px;color:#7f7378;letter-spacing:.04em;line-height:1;padding:1px 2px;border:1px solid #342a2d;border-radius:3px;background:#0e0c0d}
+.skill-settings[open]{grid-column:1/-1;width:100%;margin-top:3px;padding-top:4px;border-top:1px solid #262023}
+.skill-settings-body{display:grid;grid-template-columns:1fr;gap:3px}
+.skill-source-select,.skill-detail-inline{min-height:21px;padding:2px 20px 2px 5px;font-size:7px;border-radius:6px}
+.skill-detail-inline{padding-right:5px}
+.skill-source-tag{font-size:6px;padding:1px 3px;border-radius:999px}
+.mini-help{font-size:6px;margin:5px 0 0}
+
+.talents-compact-card{padding:10px}
+.talent-compact-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.talent-compact-item{padding:6px;border:1px solid #32282b;background:#060606;border-left:2px solid #b59057}
+.talent-compact-item b{font:700 12px/1.05 var(--serif)}
+.talent-compact-item small{display:block;font-size:7px;color:#988b8f;margin-top:2px}
+.talent-compact-item p{font-size:9px;line-height:1.35;color:#beb0b4;margin:5px 0}
+.talent-note-mini{font-size:8px;min-height:25px}
+.talent-add{margin-top:7px}
+.talent-add summary{font-size:11px;font-weight:800}
+.talent-add .talent-picker{margin-top:8px}
+.talent-add .talent-preview{padding:8px;margin:6px 0}
+.talent-add .talent-preview h3{font-size:13px}
+.talent-add .talent-preview p{font-size:9px}
+.talent-params.compact-fields{display:grid;grid-template-columns:1fr;gap:4px}
+.icon-danger{width:23px;height:23px;padding:0;font-size:14px}
+
+.inventory-item,.weapon-card,.equipment-editor-card{border-color:#3a2f34;background:linear-gradient(180deg,#0b090b,#060606)}
+.inventory-item-head,.equipment-editor-head,.weapon-editor-head{display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px;align-items:start;margin-bottom:8px}
+.inventory-image-preview{width:72px;height:72px;border:1px dashed #4c3a3f;background:#050505;color:#786b70;font-size:8px}
+.inventory-image-preview.has-image{border-style:solid;border-color:#6b4b54}
+.inventory-image-actions{margin-top:4px;gap:4px;flex-wrap:wrap}
+.inventory-image-actions button{padding:4px 6px;font-size:8px}
+.inventory-image-actions .toggle-inline{font-size:8px;padding:3px 5px;border:1px solid #35282b;background:#080808;border-radius:4px}
+.equipment-card .equipment-card-edit{pointer-events:auto}
+
+@media(max-width:1500px){
+  .overview-grid{grid-template-columns:142px minmax(0,1.85fr) minmax(250px,.95fr) minmax(200px,.82fr)}
+  .skill-ledger{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:1120px){
+  .overview-grid{grid-template-columns:140px minmax(0,1fr)}
+  .overview-talents,.overview-quick{grid-column:1/-1}
+  .skill-ledger{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .skill-ledger{grid-template-columns:1fr}
+  .inventory-item-head,.equipment-editor-head,.weapon-editor-head{grid-template-columns:60px minmax(0,1fr)}
+  .inventory-image-preview{width:60px;height:60px}
+}

@@ -1,3 +1,17 @@
+# Checklist — Etapa 4.3
+
+## Validado nesta revisão
+- [x] Perícias renderizadas em formato realmente compacto.
+- [x] Banco de talentos com 32 talentos carregado.
+- [x] Inclusão de talento funcionando.
+- [x] Logo/símbolo da Legião aparecendo corretamente no header.
+- [x] Botão Editar nas cartas do baralho levando ao editor correspondente.
+- [x] Item geral com imagem e marcador “no baralho” funcionando.
+- [x] Categoria “Arma mágica” presente no seletor.
+- [x] Preview desktop e mobile gerados após os ajustes.
+
+---
+
 # Etapa 3A · Checklist visual e funcional
 
 # Checklist — Etapa 2M

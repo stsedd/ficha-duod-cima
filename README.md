@@ -1,4 +1,24 @@
-# Ficha Universal da Duodécima — Etapa 4
+# Ficha Universal da Duodécima — Etapa 4.3
+
+Pacote revisado após a checagem final da usuária. Esta versão corrige a entrega anterior e inclui as mudanças que haviam ficado pendentes na interface.
+
+## Destaques da 4.3
+
+- Perícias realmente comprimidas, com blocos menores e P/E reduzidos.
+- Logo da Legião no header corrigido e local ao projeto.
+- Banco de **32 talentos** disponível e área de talentos mais evidente.
+- Atributos-base continuam editáveis após a criação.
+- Ajuste manual persistente de Defesa.
+- Imagens em armadura, escudo, armas e itens gerais.
+- Itens gerais podem ser marcados para aparecer no baralho.
+- Categorias de inventário incluem Arma, Arma mágica, Herança, Relíquia e outras.
+- Fallback de armazenamento em memória para ambientes onde o `localStorage` estiver bloqueado.
+
+Abra `index.html` para usar localmente. Os dados continuam exportáveis/importáveis em JSON.
+
+---
+
+# Ficha Universal da Duodécima — Etapa 4.2
 
 Reestruturação visual e funcional inspirada na densidade de uma ficha tradicional de RPG de mesa, mantendo a identidade preta e vermelha da Legio XII Fulminata.
 
@@ -15,4 +35,13 @@ Reestruturação visual e funcional inspirada na densidade de uma ficha tradicio
 - Ajustes de densidade e hierarquia aplicados também às abas Inventário, Familiares, Roma, Magia, História e Notas.
 - Saves que estavam na antiga aba `abilities` migram automaticamente para `combat`.
 
-Abra `index.html` para testar localmente. Os dados continuam salvos no navegador e podem ser exportados/importados em JSON.
+Abra `index.html` para testar localmente. Os dados continuam salvos no navegador e podem ser exportados/importados em JSON. A Etapa 4.2 usa schema v21 e migra automaticamente saves v20.
+
+### Etapa 4.2
+- Perícias ultracompactas com P/E mínimos antes do nome.
+- 32 talentos atualizados.
+- Atributos-base editáveis após a criação.
+- Ajuste manual persistente de Defesa.
+- Imagens em armadura, escudo, armas e itens gerais.
+- Itens gerais podem ser fixados no baralho visual.
+- Categorias de inventário incluem Arma, Arma mágica, Herança, Relíquia e outras.
