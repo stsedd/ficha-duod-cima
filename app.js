@@ -120,7 +120,7 @@
   function energyRollPenalty(){return state.currentEnergy<=energyMax()/2?-1:0}
   function exhaustionRollPenalty(){return -2*clamp(Number(state.exhaustion)||0,0,6)}
   function returnRollPenalty(){return -2*(Number(state.death?.returnCount)||0)}
-  function globalD20Penalty(){return energyRollPenalty()+exhaustionRollPenalty()+returnRollPenalty()+(Number(state.tempMods?.rolls)||0)}
+  function globalD20Penalty(){return energyRollPenalty()+exhaustionRollPenalty()+returnRollPenalty()}
   function attrRollConditionPenalty(k){return k==='des'?conditionDexRollMod():0}
   function castAttack(){return effectiveAttr(god().casting)+bp()+globalD20Penalty()+attrRollConditionPenalty(god().casting)}
   function castDT(){return 8+effectiveAttr(god().casting)+bp()}
@@ -271,11 +271,11 @@
   }
   function load(){
     try{
-      if(window.__DUODECIMA_PRELOAD__){state=migrate(window.__DUODECIMA_PRELOAD__);save();return;}
+      if(window.__DUODECIMA_PRELOAD__){state=migrate(window.__DUODECIMA_PRELOAD__); if(state.tempMods) state.tempMods.rolls=0; save();return;}
       let raw=safeStorage.getItem(STORAGE_KEY);
       if(!raw){for(const k of LEGACY_KEYS){raw=safeStorage.getItem(k);if(raw)break}}
       if(!raw)return;
-      state=migrate(JSON.parse(raw));save();
+      state=migrate(JSON.parse(raw)); if(state.tempMods) state.tempMods.rolls=0; save();
     }catch(e){console.warn(e)}
   }
   function syncCurrentCaps(){
@@ -503,9 +503,9 @@
     const profileBits=[h.age?`${esc(h.age)} anos`:'',state.roma?.cohort?esc(state.roma.cohort):'',h.origin?esc(h.origin):'',state.roma?.citizenship?esc(state.roma.citizenship):''].filter(Boolean);
     return `<aside class="character-rail card">
       <div class="rail-brandline"><span>LEG · XII · FULMINATA</span><b>${GROUP_LABEL[g.group]||g.group}</b></div>
-      <div class="rail-portrait-wrap"><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
+      <div class="rail-portrait-wrap"><div class="rail-portrait-badges"><label class="rail-orb rail-orb-level"><span>Nível</span><input id="levelOrbInput" type="number" min="1" max="100" value="${state.level}"></label><div class="rail-orb rail-orb-bp"><span>BP</span><strong>${signed(bp())}</strong></div></div><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
       <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
-      <div class="rail-level-row"><div><span>Nível</span><strong>${state.level}</strong></div><div><span>BP</span><strong>${signed(bp())}</strong></div><div class="rail-defense-stat"><span>Defesa</span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">ajuste <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div><span>DT</span><strong>${castDT()}</strong></div></div>
+      <div class="rail-level-row"><div class="rail-defense-stat"><span>Defesa</span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div><span>DT</span><strong>${castDT()}</strong></div></div>
       <div class="rail-vitals"><div><span>HP</span><b>${state.currentHp}/${hpMax()}</b></div><div><span>EN</span><b>${state.currentEnergy}/${energyMax()}</b><small>${energy.name}</small></div><div><span>SAN</span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${g.resource?`<div><span>${esc(g.resource.name)}</span><b>${state.resourceCurrent}/${resourceMax()}</b></div>`:''}</div>
       ${renderMiniDeath()}
       <details class="rail-editor"><summary>Editar perfil</summary><div class="stack">
@@ -531,7 +531,7 @@
     const l=state.lineage||defaultLineage(),energy=energyBand();
     return `<article class="card status-quick-card"><p class="eyebrow">REFERÊNCIA RÁPIDA</p><h3>Ficha mecânica</h3><div class="quick-fact-list">
       <div><span>Iniciativa</span><b>1d20 ${signed(initiativeBonus())}</b></div><div><span>Conjuração</span><b>1d20 ${signed(castAttack())}</b></div><div><span>DT</span><b>${castDT()}</b></div><div><span>RD</span><b>${damageReduction()}</b></div><div><span>Energia</span><b>${energy.name}</b></div><div><span>Exaustão</span><b>${state.exhaustion}/6</b></div><div><span>Fama</span><b>${signed(fameTotal())}</b></div><div><span>Linhagem</span><b>${l.type==='normal'?'Direta':l.type==='compound'?'Legado composto':'Legado direto'}</b></div>
-    </div><div class="divider"></div><div class="status-line ${energy.cls}"><b>Penalidade global ${signed(globalD20Penalty())}</b><span>Energia ${energyRollPenalty()} · Exaustão ${exhaustionRollPenalty()} · Retornos ${returnRollPenalty()} · Temporário ${Number(state.tempMods.rolls)||0}</span></div><details class="compact-disclosure"><summary>Origem dos valores</summary><p class="compact"><b>Kit:</b> ${esc(g.source)}<br><b>HP:</b> ${g.hpBase} + CON; +${g.hpPerDecade} + CON a cada 10 níveis.<br><b>Bônus divinos:</b> ${bonusText(g)}<br><b>Perícias divinas:</b> ${divineGranted().join(', ')||'—'}</p></details></article>`;
+    </div><div class="divider"></div><div class="status-line ${energy.cls}"><b>Estado atual</b><span>Energia ${energy.name} · Exaustão ${state.exhaustion}/6 · Retornos ${state.death?.returnCount||0}</span></div><details class="compact-disclosure"><summary>Origem dos valores</summary><p class="compact"><b>Kit:</b> ${esc(g.source)}<br><b>HP:</b> ${g.hpBase} + CON; +${g.hpPerDecade} + CON a cada 10 níveis.<br><b>Bônus divinos:</b> ${bonusText(g)}<br><b>Perícias divinas:</b> ${divineGranted().join(', ')||'—'}</p></details></article>`;
   }
 
   function renderStatusTab(g){
@@ -569,7 +569,7 @@
     return `<section class="tab-pane ${state.activeTab==='combat'?'':'hidden'}" data-pane="combat">
       ${renderCombatResourceDock()}
       <section class="combat-command-grid mechanics-section">
-        <article class="card combat-essentials-card"><div class="section-title"><div><p class="eyebrow">COMBATE</p><h3>Referência imediata</h3></div><button id="rollDefense" class="primary">Rolar Defesa</button></div><div class="combat-quick-values"><div><span>Defesa</span><b>${fDef!==null?fDef:`1d20 ${signed(defenseBonus())}`}</b></div><div><span>Iniciativa</span><b>1d20 ${signed(initiativeBonus())}</b></div><div><span>RD</span><b>${damageReduction()}</b></div><div><span>Conjuração</span><b>1d20 ${signed(castAttack())}</b></div><div><span>DT</span><b>${castDT()}</b></div><div><span>Sanidade</span><b>${san.name}</b></div></div><div class="grid two compact-fields"><label><span class="label">Ajuste manual de Defesa</span><input id="tempDefense" type="number" value="${state.tempMods.defense}"></label><label><span class="label">Mod. global</span><input id="tempRolls" type="number" value="${state.tempMods.rolls}"></label></div>${state.lastRoll?`<div class="roll-result compact-roll"><span>${esc(state.lastRoll.label)}</span><b>${state.lastRoll.total}</b><small>d20 ${state.lastRoll.die}${state.lastRoll.modifier!==undefined?` ${signed(state.lastRoll.modifier)}`:''}</small></div>`:''}</article>
+        <article class="card combat-essentials-card"><div class="section-title"><div><p class="eyebrow">COMBATE</p><h3>Referência imediata</h3></div><button id="rollDefense" class="primary">Rolar Defesa</button></div><div class="combat-quick-values"><div><span>Defesa</span><b>${fDef!==null?fDef:`1d20 ${signed(defenseBonus())}`}</b></div><div><span>Iniciativa</span><b>1d20 ${signed(initiativeBonus())}</b></div><div><span>RD</span><b>${damageReduction()}</b></div><div><span>Conjuração</span><b>1d20 ${signed(castAttack())}</b></div><div><span>DT</span><b>${castDT()}</b></div><div><span>Sanidade</span><b>${san.name}</b></div></div><div class="compact-fields"><label><span class="label">Ajuste manual de Defesa</span><input id="tempDefense" type="number" value="${state.tempMods.defense}"></label></div>${state.lastRoll?`<div class="roll-result compact-roll"><span>${esc(state.lastRoll.label)}</span><b>${state.lastRoll.total}</b><small>d20 ${state.lastRoll.die}${state.lastRoll.modifier!==undefined?` ${signed(state.lastRoll.modifier)}`:''}</small></div>`:''}</article>
         ${renderCompactActiveConditions()}
         <article class="card combat-rest-card"><p class="eyebrow">DESCANSOS & MODS</p><div class="row"><button id="shortRest" class="primary">Descanso curto</button><button id="longRest">Longo</button></div><div class="grid two compact-fields"><label><span class="label">RD temporária</span><input id="tempReduction" type="number" value="${state.tempMods.damageReduction}"></label><label><span class="label">Exaustão</span><select id="combatExhaustionSelect">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${state.exhaustion===n?'selected':''}>${n}</option>`).join('')}</select></label></div><div class="subcard compact"><b>Energia:</b> ${energy.name}<br><b>Curto:</b> +25 HP / +150 EN · <b>Longo:</b> HP e EN completos.</div></article>
       </section>
@@ -864,7 +864,9 @@
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.tab;save();renderSheet()});
     document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.goTab;save();renderSheet()});
     document.querySelectorAll('[data-edit-equipment]').forEach(b=>b.onclick=()=>{const target=b.dataset.editEquipment;state.activeTab='inventory';save();renderSheet();setTimeout(()=>{let el=null;if(target==='armor')el=byId('armorEditor');else if(target==='shield')el=byId('shieldEditor');else if(target.startsWith('weapon:'))el=document.querySelector(`[data-weapon-card="${target.slice(7)}"]`);else if(target.startsWith('item:'))el=document.querySelector(`[data-item-card="${target.slice(5)}"]`);if(el){el.classList.add('edit-flash');el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>el.classList.remove('edit-flash'),1400)}},0)});
-    const level=byId('levelInput');if(level)level.onchange=e=>{const old=state.level;state.level=clamp(parseInt(e.target.value||1,10),1,100);while(spentLevelPoints()>earnedLevelPoints()){const k=Object.keys(state.levelAttributes).find(x=>state.levelAttributes[x]>0);if(!k)break;state.levelAttributes[k]--}syncCurrentCaps();save();renderSheet();if(state.level!==old)notify('Nível atualizado.')};
+    const bindLevelChange = el => { if(!el) return; el.onchange=e=>{const old=state.level;state.level=clamp(parseInt(e.target.value||1,10),1,100);while(spentLevelPoints()>earnedLevelPoints()){const k=Object.keys(state.levelAttributes).find(x=>state.levelAttributes[x]>0);if(!k)break;state.levelAttributes[k]--}syncCurrentCaps();save();renderSheet();if(state.level!==old)notify('Nível atualizado.')}; };
+    bindLevelChange(byId('levelInput'));
+    bindLevelChange(byId('levelOrbInput'));
     const sn=byId('sheetNameInput');if(sn)sn.onchange=e=>{state.name=e.target.value;save();renderSheet()};
     const sp=byId('sheetPlayerInput');if(sp)sp.onchange=e=>{state.player=e.target.value;save()};
     byId('backCreation').onclick=()=>{state.isCreated=false;save();render()};
@@ -886,7 +888,6 @@
     document.querySelectorAll('[data-exhaustion]').forEach(b=>b.onclick=()=>{state.exhaustion=Number(b.dataset.exhaustion);syncCurrentCaps();save();renderSheet()});
     const exSel=byId('combatExhaustionSelect'); if(exSel) exSel.onchange=e=>{state.exhaustion=Number(e.target.value)||0; syncCurrentCaps(); save(); renderSheet()};
 
-    const tr=byId('tempRolls');if(tr)tr.onchange=e=>{state.tempMods.rolls=Number(e.target.value)||0;save();renderSheet()};
     const td=byId('tempDefense');if(td)td.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const tdr=byId('tempReduction');if(tdr)tdr.onchange=e=>{state.tempMods.damageReduction=Number(e.target.value)||0;save();renderSheet()};

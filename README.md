@@ -1,47 +1,21 @@
-# Ficha Universal da Duodécima — Etapa 4.3
+# Ficha Universal da Duodécima — Etapa 4.4
 
-Pacote revisado após a checagem final da usuária. Esta versão corrige a entrega anterior e inclui as mudanças que haviam ficado pendentes na interface.
+Pacote revisado com os ajustes finais solicitados na rodada de revisão visual.
 
-## Destaques da 4.3
+## Destaques da versão
 
-- Perícias realmente comprimidas, com blocos menores e P/E reduzidos.
-- Logo da Legião no header corrigido e local ao projeto.
-- Banco de **32 talentos** disponível e área de talentos mais evidente.
-- Atributos-base continuam editáveis após a criação.
-- Ajuste manual persistente de Defesa.
-- Imagens em armadura, escudo, armas e itens gerais.
-- Itens gerais podem ser marcados para aparecer no baralho.
-- Categorias de inventário incluem Arma, Arma mágica, Herança, Relíquia e outras.
-- Fallback de armazenamento em memória para ambientes onde o `localStorage` estiver bloqueado.
+- Perícias compactas em **2 colunas** no desktop.
+- Cartas do baralho com **imagem quadrada**.
+- Remoção da área de **penalidade global** da interface.
+- **Nível** editável e **BP** destacados em orbes sobre o retrato.
+- Ajuste manual de **Defesa** visível e mantido.
+- Logo/ícone da Legião corrigido, sem o “X” vermelho lateral.
 
-Abra `index.html` para usar localmente. Os dados continuam exportáveis/importáveis em JSON.
+## Arquivos importantes
 
----
+- `index.html` — ponto de entrada
+- `styles.css` — estilos (cache busting `v=4.4`)
+- `app.js` — lógica principal
+- `legio-mark-clean.png` — ícone ajustado do header
 
-# Ficha Universal da Duodécima — Etapa 4.2
-
-Reestruturação visual e funcional inspirada na densidade de uma ficha tradicional de RPG de mesa, mantendo a identidade preta e vermelha da Legio XII Fulminata.
-
-## O que mudou nesta etapa
-
-- Perfil permanente na lateral, com retrato maior, nome em evidência, dados rápidos e teste contra a morte compacto.
-- Visão Geral condensada: atributos em coluna, perícias em grade compacta, talentos e referência mecânica lado a lado.
-- Perícias menores e mais densas; em telas largas, distribuídas em três colunas.
-- Combate e Poderes unidos na mesma aba.
-- Todas as estacas cadastradas de cada habilidade ficam visíveis simultaneamente; a estaca atual apenas recebe destaque.
-- Habilidades em até quatro colunas no desktop para reduzir rolagem vertical.
-- Baralho de equipamentos preservado e agora com botões Editar/Adicionar funcionais que levam ao editor correspondente.
-- Paleta refeita com preto mais profundo e vermelho mais vivo, bordas mais presentes e cantos menos arredondados.
-- Ajustes de densidade e hierarquia aplicados também às abas Inventário, Familiares, Roma, Magia, História e Notas.
-- Saves que estavam na antiga aba `abilities` migram automaticamente para `combat`.
-
-Abra `index.html` para testar localmente. Os dados continuam salvos no navegador e podem ser exportados/importados em JSON. A Etapa 4.2 usa schema v21 e migra automaticamente saves v20.
-
-### Etapa 4.2
-- Perícias ultracompactas com P/E mínimos antes do nome.
-- 32 talentos atualizados.
-- Atributos-base editáveis após a criação.
-- Ajuste manual persistente de Defesa.
-- Imagens em armadura, escudo, armas e itens gerais.
-- Itens gerais podem ser fixados no baralho visual.
-- Categorias de inventário incluem Arma, Arma mágica, Herança, Relíquia e outras.
+Abra `index.html` para usar localmente. A ficha continua exportando/importando JSON normalmente.

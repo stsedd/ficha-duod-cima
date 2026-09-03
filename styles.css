@@ -1074,3 +1074,52 @@ footer{padding-top:16px;color:#655b5e;font-size:9px}
   .inventory-item-head,.equipment-editor-head,.weapon-editor-head{grid-template-columns:60px minmax(0,1fr)}
   .inventory-image-preview{width:60px;height:60px}
 }
+
+
+/* Etapa 4.4 — refinamentos finais solicitados */
+.legion-brand-icon img{object-fit:contain;background:#090708}
+.brand-icon{padding:2px}
+
+/* Perícias: manter estilo compacto, mas em 2 colunas no desktop */
+.skill-ledger{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:4px}
+.skill-ledger-row{min-height:28px;padding:3px 5px}
+.skill-row-main{grid-template-columns:auto minmax(0,1fr) auto auto}
+.skill-ledger-name b{font-size:10.8px}
+.skill-ledger-name small{font-size:6px;line-height:1.05}
+@media(max-width:760px){.skill-ledger{grid-template-columns:1fr !important}}
+
+/* Deck com imagens quadradas */
+.equipment-card{min-height:218px}
+.equipment-card-media,.equipment-card-glyph{width:84px;height:84px;margin:14px auto 9px;display:grid;place-items:center;border:1px solid #392b2f;background:#050505;overflow:hidden;position:relative}
+.equipment-card-media img{width:100%;height:100%;object-fit:cover}
+.equipment-card.empty .equipment-card-glyph{font-size:33px}
+.equipment-card:has(.equipment-card-media){min-height:218px}
+@media(max-width:1180px){.equipment-card,.equipment-card:has(.equipment-card-media){min-height:198px}.equipment-card-media,.equipment-card-glyph{width:72px;height:72px}}
+
+/* Orbes de nível e BP no retrato */
+.rail-portrait-wrap{position:relative;padding-top:20px}
+.rail-portrait-badges{position:absolute;inset:0 0 auto 0;z-index:3;pointer-events:none}
+.rail-orb{width:72px;height:72px;border-radius:999px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle at 35% 30%,#331017 0,#170b0d 48%,#070607 100%);border:2px solid #b99558;box-shadow:0 8px 20px rgba(0,0,0,.35),0 0 0 2px rgba(227,31,50,.18);pointer-events:auto;position:absolute;top:-10px}
+.rail-orb span{font-size:9px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#d7bf90;margin-bottom:5px}
+.rail-orb strong{font:700 22px/1 var(--serif);color:#fff}
+.rail-orb-level{left:-10px}
+.rail-orb-bp{right:-10px}
+.rail-orb-level input{width:40px;border:0;background:transparent;color:#fff;font:700 22px/1 var(--serif);text-align:center;padding:0;outline:none}
+.rail-orb-level input::-webkit-outer-spin-button,.rail-orb-level input::-webkit-inner-spin-button{margin:0}
+
+/* Linha abaixo do retrato focada em defesa/DT */
+.rail-level-row{grid-template-columns:1.2fr .8fr;gap:0}
+.rail-level-row>div{padding:8px 4px}
+.rail-defense-stat strong{display:block;margin-top:2px}
+.rail-defense-adjust{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:5px;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#c7b58c}
+.rail-defense-adjust input{width:54px;min-height:22px;padding:2px 6px;text-align:center;border-radius:5px}
+
+/* Mobile: manter orbes visíveis sem atrapalhar */
+@media(max-width:900px){
+  .rail-portrait-wrap{padding-top:14px}
+  .rail-orb{width:62px;height:62px;top:-4px}
+  .rail-orb span{font-size:8px}
+  .rail-orb strong,.rail-orb-level input{font-size:19px}
+  .rail-orb-level{left:-8px}
+  .rail-orb-bp{right:-8px}
+}
