@@ -90,7 +90,7 @@
   function ordinaryAttrCapped(k){return Math.min(5,ordinaryAttrRaw(k))}
   function structuralAttr(k){return ordinaryAttrCapped(k)+attributeExtraBonus(k)-magicSacrifice(k)}
   function basePlusLevel(k){return (state.baseAttributes[k]||0)+(state.levelAttributes[k]||0)+talentAttributeBonus(k)}
-  function talentSlotsEarned(){return [1,30,60,90].filter(n=>state.level>=n).length}
+  function talentSlotsEarned(){return (system.talentLevels||[1,30,60,90]).filter(n=>state.level>=n).length}
   function standardTalentsUsed(){return (state.talents||[]).filter(t=>!t.extra).length}
   function sanityAttrPenalty(k){
     const s=Number(state.currentSanity ?? 100);
@@ -100,13 +100,13 @@
   }
   function effectiveAttr(k){return structuralAttr(k)+sanityAttrPenalty(k)}
   function initialSkillLimit(){return 2+(state.baseAttributes.int||0)}
-  function earnedLevelPoints(){return [20,40,60,80,100].filter(n=>state.level>=n).length}
+  function earnedLevelPoints(){return (system.attributeIncreaseLevels||[20,40,60,80,100]).filter(n=>state.level>=n).length}
   function spentLevelPoints(){return sum(state.levelAttributes)}
   function remainingLevelPoints(){return Math.max(0,earnedLevelPoints()-spentLevelPoints())}
-  function bp(){const l=state.level;if(l<=20)return 1;if(l<=40)return 2;if(l<=60)return 3;if(l<=80)return 4;if(l<=99)return 5;return 6}
+  function bp(){const l=state.level,ranges=system.proficiencyRanges||[];if(ranges.length){const row=ranges.find(r=>l>=Number(r.min||0)&&(r.max==null||l<=Number(r.max)));if(row)return Number(row.bonus)||0}if(l<=20)return 1;if(l<=40)return 2;if(l<=60)return 3;if(l<=80)return 4;if(l<=99)return 5;return 6}
   function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility);return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))}
   function magicSacrificeTotal(){return ['for','des','con'].reduce((t,k)=>t+magicSacrifice(k),0)}
-  function rawEnergyMax(){return 100+Math.floor(state.level/5)*25+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0)}
+  function rawEnergyMax(){const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0)}
   function hpMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawHpMax()/2)):rawHpMax()}
   function energyMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawEnergyMax()/2)):rawEnergyMax()}
   function resourceMax(){const r=god()?.resource;return r?Number(r.max(state.level)):0}
@@ -114,11 +114,11 @@
   function skillAttr(name){return skills.find(s=>s.name===name)?.attr||null}
   function activeCondition(name){return state.conditions.includes(name)}
   function conditionData(name){return system.conditions.find(c=>c.name===name)}
-  function conditionDefenseMod(){let mod=0;if(activeCondition('Desprevenido')||activeCondition('Atordoado'))mod-=4;if(activeCondition('Desorientado'))mod-=2;return mod}
+  function conditionDefenseMod(){return state.conditions.reduce((t,n)=>t+(Number(conditionData(n)?.defenseMod)||0),0)}
   function conditionDexRollMod(){return state.conditions.reduce((t,n)=>t+(Number(conditionData(n)?.dexRollMod)||0),0)}
   function fixedDefense(){const vals=state.conditions.map(n=>conditionData(n)?.fixedDefense).filter(v=>Number.isFinite(v));return vals.length?Math.min(...vals):null}
-  function energyRollPenalty(){return state.currentEnergy<=energyMax()/2?-1:0}
-  function exhaustionRollPenalty(){return -2*clamp(Number(state.exhaustion)||0,0,6)}
+  function energyRollPenalty(){const e=system.energy||{},ratio=Number(e.lowThresholdRatio??.5),pen=Number(e.lowPenaltyD20??-1);return state.currentEnergy<=energyMax()*ratio?pen:0}
+  function exhaustionRollPenalty(){const per=Number(system.exhaustion?.d20PenaltyPerLevel??-2);return per*clamp(Number(state.exhaustion)||0,0,Number(system.exhaustion?.max??6))}
   function globalD20Penalty(){return energyRollPenalty()+exhaustionRollPenalty()}
   function attrRollConditionPenalty(k){return k==='des'?conditionDexRollMod():0}
   function castAttack(){return effectiveAttr(god().casting)+bp()+globalD20Penalty()+attrRollConditionPenalty(god().casting)}
@@ -168,7 +168,7 @@
   function weaponDiceCount(){return state.level>=80?3:state.level>=40?2:1}
   function weaponAttack(w){const a=w.attr||'for',mat=material(w.material),prof=Number(w.stakes)>=30?bp():0;return effectiveAttr(a)+(mat.attack||0)+prof+(Number(w.attackExtra)||0)+globalD20Penalty()+attrRollConditionPenalty(a)}
   function weaponDamageFormula(w){const wt=weaponType(w.type),count=weaponDiceCount(),bonus=effectiveAttr(w.attr||'for')+(Number(w.damageExtra)||0);return `${count}d${wt.die}${bonus===0?'':bonus>0?` + ${bonus}`:` - ${Math.abs(bonus)}`}`}
-  function skillTrainingSlots(){return [21,41,61,81,100].filter(n=>state.level>=n).length}
+  function skillTrainingSlots(){return (system.skillTrainingLevels||[21,41,61,81,100]).filter(n=>state.level>=n).length}
   function availableSkillTrainingSlots(){return Math.max(0,skillTrainingSlots()-state.skillTrainings.length)}
   function levelSkillUnlocked(n){return state.level>=Number(n)}
   function levelSkillChoicesFromMeta(n){
@@ -493,7 +493,7 @@
       <div class="rail-death-counters"><span>Sucessos ${dots(d.successes,'success')}</span><span>Falhas ${dots(d.failures,'failure')}</span></div>
       ${active&&!d.dead&&!d.stable?`<button id="rollDeath" class="primary rail-death-roll">Rolar teste</button><div class="rail-death-actions"><button id="deathSuccessManual">+ sucesso</button><button id="deathFailureManual">+ falha</button><button id="deathDamage">dano</button><button id="deathCrit">crítico</button><button id="medicineStabilize">medicina</button></div>`:''}
       ${d.stable&&!d.dead?`<button id="stableRecover">Recuperar 1 HP</button>`:''}${d.dead?`<button id="narrativeRestore">Intervenção narrativa</button>`:''}
-      <details><summary>regra rápida · ${d.returnCount||0} retorno(s)</summary><p>10+ sucesso · 1 natural = 2 falhas · 20 natural = 1 HP. Cada retorno após 0 HP aplica −2 cumulativo em todos os dados.</p></details>
+      <details><summary>regra rápida · ${d.returnCount||0} retorno(s)</summary><p>10+ sucesso · 1 natural = 2 falhas · 20 natural = 1 HP. Retornar à consciência após 0 HP não aplica penalidade cumulativa.</p></details>
     </section>`;
   }
 
@@ -831,7 +831,7 @@
     const d=state.death,active=state.currentHp===0;
     const counters=`<div class="grid two"><div class="death-count success"><span>Sucessos</span><b>${d.successes}/3</b></div><div class="death-count failure"><span>Falhas</span><b>${d.failures}/3</b></div></div>`;
     if(!active)return `<div class="death-panel inactive"><div class="row between"><div><p class="eyebrow">VIDA & MORTE</p><h3>Testes contra a morte</h3></div><span class="pill good">Inativos · HP ${state.currentHp}</span></div>${counters}<p class="muted compact">Os testes ficam ativos automaticamente quando o HP chegar a 0. Regra: 10+ = sucesso; abaixo de 10 = falha; 1 natural = 2 falhas; 20 natural = recupera 1 HP e pode agir.</p><div class="subcard compact"><b>Ao sofrer dano em 0 HP:</b> +1 falha; se for crítico, +2 falhas. Medicina DT 10 estabiliza. Após 3 sucessos, estabiliza; após 3 falhas, morre.</div><div class="subcard compact"><b>Retornos após chegar a 0 HP:</b> ${d.returnCount||0}<br><span class="muted">Retornar à consciência não aplica penalidade cumulativa.</span></div></div>`;
-    return `<div class="death-panel ${d.dead?'dead':''}"><div class="row between"><div><p class="eyebrow">VIDA & MORTE</p><h3>${d.dead?'Morto':d.stable?'Estável':'Testes contra a morte'}</h3></div><span class="pill warn">HP 0</span></div>${counters}${d.lastRoll!==null?`<div class="roll-result"><span>Último teste</span><b>${d.lastRoll}</b></div>`:''}${!d.dead&&!d.stable?`<div class="row death-manual"><button id="deathSuccessManual">+1 sucesso</button><button id="deathFailureManual">+1 falha</button></div><button id="rollDeath" class="primary wide-button">Rolar 1d20 na ficha</button><p class="muted compact">Se preferir rolar no Discord, use os botões de sucesso/falha acima. 10+ sucesso · abaixo de 10 falha · 1 natural = 2 falhas · 20 natural = 1 HP e pode agir.</p><div class="row"><button id="deathDamage">Dano a 0 HP · +1 falha</button><button id="deathCrit">Crítico a 0 HP · +2 falhas</button><button id="medicineStabilize">Medicina DT 10 · estabilizar</button></div>`:''}${d.stable&&!d.dead?`<div class="notice">3 sucessos: estabilizado. Sem cura, recupera 1 HP após 1d4 horas.</div><button id="stableRecover">Recuperar 1 HP após 1d4h</button>`:''}${d.dead?`<div class="notice danger-note">3 falhas: personagem morto.</div><button id="narrativeRestore">Intervenção narrativa · restaurar 1 HP</button>`:''}<div class="subcard compact" style="margin-top:10px">Cada retorno à consciência depois de atingir 0 HP acrescenta <b>−2 em todos os dados</b>. Retornos acumulados: <b>${d.returnCount||0}</b>.</div></div>`;
+    return `<div class="death-panel ${d.dead?'dead':''}"><div class="row between"><div><p class="eyebrow">VIDA & MORTE</p><h3>${d.dead?'Morto':d.stable?'Estável':'Testes contra a morte'}</h3></div><span class="pill warn">HP 0</span></div>${counters}${d.lastRoll!==null?`<div class="roll-result"><span>Último teste</span><b>${d.lastRoll}</b></div>`:''}${!d.dead&&!d.stable?`<div class="row death-manual"><button id="deathSuccessManual">+1 sucesso</button><button id="deathFailureManual">+1 falha</button></div><button id="rollDeath" class="primary wide-button">Rolar 1d20 na ficha</button><p class="muted compact">Se preferir rolar no Discord, use os botões de sucesso/falha acima. 10+ sucesso · abaixo de 10 falha · 1 natural = 2 falhas · 20 natural = 1 HP e pode agir.</p><div class="row"><button id="deathDamage">Dano a 0 HP · +1 falha</button><button id="deathCrit">Crítico a 0 HP · +2 falhas</button><button id="medicineStabilize">Medicina DT 10 · estabilizar</button></div>`:''}${d.stable&&!d.dead?`<div class="notice">3 sucessos: estabilizado. Sem cura, recupera 1 HP após 1d4 horas.</div><button id="stableRecover">Recuperar 1 HP após 1d4h</button>`:''}${d.dead?`<div class="notice danger-note">3 falhas: personagem morto.</div><button id="narrativeRestore">Intervenção narrativa · restaurar 1 HP</button>`:''}<div class="subcard compact" style="margin-top:10px">Retornos após atingir 0 HP: <b>${d.returnCount||0}</b>. <span class="muted">Não existe penalidade cumulativa por retornar.</span></div></div>`;
   }
 
   function magicAbilityStakeMax(a){
@@ -848,10 +848,36 @@
     const passives=Array.isArray(set?.passives)?set.passives:[],actives=Array.isArray(set?.actives)?set.actives:[];
     return `<section class="abilities-wrap mechanics-section"><div class="section-title ability-section-head"><div><p class="eyebrow">PODERES DIVINOS</p><h2>${lineageAbilityTitle()}</h2><p class="muted compact">As três estacas ficam sempre visíveis. A faixa atual é destacada sem esconder as demais regras.</p></div><div class="row"><span class="pill">${passives.length} passivas</span><span class="pill">${actives.length} ativas</span></div></div><div class="ability-group"><div class="ability-group-title"><b>Passivas</b><span>sempre disponíveis quando a regra permitir</span></div><div class="ability-grid">${passives.length?passives.map(renderAbility).join(''):'<div class="notice">Nenhuma passiva carregada.</div>'}</div></div><div class="ability-group"><div class="ability-group-title"><b>Ativas</b><span>nível, custo e uso em combate</span></div><div class="ability-grid">${actives.length?actives.map(renderAbility).join(''):'<div class="notice">Nenhuma ativa carregada.</div>'}</div></div></section>`;
   }
+  function coreSubStakeKey(a,variantId,subId){return `${abilityKey(a)}:core:${variantId}:${subId}`}
+  function coreStakeValue(key){return clamp(Number(state.abilityStakes?.[key]||0),0,30)}
+  function coreTierCurrent(tier,value){const min=Number(tier?.min??0),max=tier?.max==null?Infinity:Number(tier.max);return value>=min&&value<=max}
+  function renderCoreTierRows(tiers,key){
+    const value=coreStakeValue(key);
+    return `<div class="core-subtiers">${(tiers||[]).map(t=>`<div class="core-subtier ${coreTierCurrent(t,value)?'current':''}"><b>${esc(t.label||t.id||'Estaca')}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div><div class="core-substake"><div class="row between"><span>Estacas</span><b>${value}/30</b></div><input type="range" min="0" max="30" value="${value}" data-core-stakes="${esc(key)}"><div class="stake-quick"><button data-core-stake-set="${esc(key)}:0">0</button><button data-core-stake-set="${esc(key)}:16">16</button><button data-core-stake-set="${esc(key)}:30">30</button></div></div>`;
+  }
+  function renderCoreVariant(a,v){
+    const stats=v.stats?Object.entries(v.stats).map(([k,val])=>`<span><small>${k==='hpFormula'?'HP':k==='defense'?'DEFESA':esc(k)}</small><b>${esc(val)}</b></span>`).join(''):'';
+    const traits=(v.traits||[]).length?`<ul>${v.traits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+    const abilities=(v.abilities||[]).map(sub=>{const key=coreSubStakeKey(a,v.id||v.name,sub.id||sub.name);return `<section class="core-subability"><h5>${esc(sub.name)}</h5>${sub.description?`<p>${esc(sub.description)}</p>`:''}${(sub.tiers||[]).length?renderCoreTierRows(sub.tiers,key):''}</section>`}).join('');
+    return `<article class="core-variant"><header><h4>${esc(v.name)}</h4>${v.description?`<p>${esc(v.description)}</p>`:''}</header>${stats?`<div class="core-stat-pills">${stats}</div>`:''}${traits}${abilities?`<div class="core-variant-abilities">${abilities}</div>`:''}</article>`;
+  }
+  function renderCoreBlocks(a){
+    const blocks=Array.isArray(a.coreBlocks)?a.coreBlocks:[];
+    if(!blocks.length)return '';
+    return `<div class="core-blocks">${blocks.map(b=>{
+      if(b.type==='description'){if(String(b.text||'').trim()===String(a.summary||'').trim())return '';return `<p class="core-description">${esc(b.text||'')}</p>`;}
+      if(b.type==='note')return `<div class="core-note">${esc(b.text||'')}</div>`;
+      if(b.type==='tiers')return a.tiers?'':`<div class="core-subtiers plain">${(b.items||[]).map(t=>`<div class="core-subtier"><b>${esc(t.label||t.id)}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div>`;
+      if(b.type==='variants')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Variantes')}</div><div class="core-variant-grid">${(b.items||[]).map(v=>renderCoreVariant(a,v)).join('')}</div></div>`;
+      if(b.type==='options')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Opções')}</div><div class="core-option-grid">${(b.items||[]).map(o=>`<article><h4>${esc(o.name)}</h4>${o.base?`<p>${esc(o.base)}</p>`:''}${o.upgrade?`<small>${esc(o.upgrade)}</small>`:''}</article>`).join('')}</div></div>`;
+      return '';
+    }).join('')}</div>`;
+  }
+
   function renderAbility(a){
     const maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
     const tiers=a.tiers?[['low','0–15',a.tiers.low,st<=15],['mid','16–29',a.tiers.mid,st>=16&&st<=29],['high','30+',a.tiers.high,st>=30]].filter(x=>x[2]):[];
-    return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'}"><div class="ability-head"><div><div class="row ability-title-row"><b>${a.name}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span>Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div><p class="ability-summary">${a.summary}</p>${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><p>${text}</p></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:`<div class="ability-tier-list single"><div class="ability-tier current"><p>${a.extra||'Sem estacas mecânicas cadastradas.'}</p></div></div>`}${a.extra&&a.tiers?`<details class="ability-notes"><summary>Observações</summary><p>${a.extra}</p></details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
+    return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'}"><div class="ability-head"><div><div class="row ability-title-row"><b>${a.name}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span>Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div><p class="ability-summary">${a.summary}</p>${renderCoreBlocks(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><p>${text}</p></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:`<div class="ability-tier-list single"><div class="ability-tier current"><p>${a.extra||'Sem estacas mecânicas cadastradas.'}</p></div></div>`}${a.extra&&a.tiers?`<details class="ability-notes"><summary>Observações</summary><p>${a.extra}</p></details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
   }
   function applyManualResource(kind,input){
     const delta=Number(input?.value);if(!Number.isFinite(delta)||delta===0){notify('Digite um ajuste, por exemplo -37 ou 20.');return}
@@ -879,6 +905,8 @@
     document.querySelectorAll('[data-manual-resource]').forEach(b=>b.onclick=()=>applyManualResource(b.dataset.manualResource,byId(b.dataset.manualInput)));
     document.querySelectorAll('[data-resource-manual-input]').forEach(input=>input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyManualResource(input.dataset.resourceManualInput,input)}});
     document.querySelectorAll('[data-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.stakes]=clamp(Number(input.value),0,Number(input.dataset.stakeMax)||30);save();renderSheet()});
+    document.querySelectorAll('[data-core-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.coreStakes]=clamp(Number(input.value),0,30);save();renderSheet()});
+    document.querySelectorAll('[data-core-stake-set]').forEach(btn=>btn.onclick=()=>{const raw=btn.dataset.coreStakeSet||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),value=Number(raw.slice(idx+1));if(!key)return;state.abilityStakes[key]=clamp(value,0,30);save();renderSheet()});
     document.querySelectorAll('[data-stake-set]').forEach(b=>b.onclick=()=>{const idx=b.dataset.stakeSet.lastIndexOf(':'),key=b.dataset.stakeSet.slice(0,idx),v=Number(b.dataset.stakeSet.slice(idx+1)),limit=Number(b.dataset.stakeLimit)||30;state.abilityStakes[key]=clamp(v,0,limit);save();renderSheet()});
     document.querySelectorAll('[data-use-ability]').forEach(b=>b.onclick=()=>useAbility(Number(b.dataset.cost)));
     document.querySelectorAll('[data-condition]').forEach(c=>c.onchange=()=>toggleCondition(c.dataset.condition,c.checked));
@@ -964,7 +992,7 @@
     input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const src=String(reader.result||'');const img=new Image();img.onload=()=>{try{const max=1000,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));canvas.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);const compact=canvas.toDataURL('image/webp',.82);onReady(compact&&compact!=='data:,'?compact:src)}catch(err){onReady(src)}};img.onerror=()=>onReady(src);img.src=src};reader.readAsDataURL(file)};input.click();
   }
   function toggleCondition(name,on){if(on&&!state.conditions.includes(name))state.conditions.push(name);if(!on)state.conditions=state.conditions.filter(x=>x!==name);save();renderSheet()}
-  function shortRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}setHp(state.currentHp+25);setEnergy(state.currentEnergy+150);save();renderSheet();notify('Descanso curto: +25 HP e +150 Energia.')}
+  function shortRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150);setHp(state.currentHp+hp);setEnergy(state.currentEnergy+en);save();renderSheet();notify(`Descanso curto: +${hp} HP e +${en} Energia.`)}
   function longRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}setHp(hpMax());setEnergy(energyMax());if(state.magic?.enabled)state.magic.highCircleUsed={6:0,7:0,8:0,9:0};save();renderSheet();notify('Descanso longo: HP e Energia completos; usos mágicos altos restaurados.')}
   function rollD20(label,modifier){const die=Math.floor(Math.random()*20)+1,total=die+modifier;state.lastRoll={label,die,modifier,total};save();renderSheet();notify(`${label}: ${total} (${die} no d20).`)}
   function rollDefense(){const f=fixedDefense();if(f!==null){state.lastRoll={label:'Defesa fixa',die:'—',modifier:0,total:f};save();renderSheet();notify(`Defesa fixa: ${f}.`);return}rollD20('Defesa',defenseBonus())}
