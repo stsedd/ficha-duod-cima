@@ -1,21 +1,16 @@
-# Ficha Universal da Duodécima — Etapa 4.4
+# Ficha Universal da Duodécima — Kits Consolidados v5.0
 
-Pacote revisado com os ajustes finais solicitados na rodada de revisão visual.
+Versão baseada na ficha publicada em `stsedd.github.io/ficha-oficial-duodecima-rpg/`, sincronizada com o Guia da Duodécima consolidado em 04/09/2026.
 
-## Destaques da versão
+## O que foi atualizado
 
-- Perícias compactas em **2 colunas** no desktop.
-- Cartas do baralho com **imagem quadrada**.
-- Remoção da área de **penalidade global** da interface.
-- **Nível** editável e **BP** destacados em orbes sobre o retrato.
-- Ajuste manual de **Defesa** visível e mantido.
-- Logo/ícone da Legião corrigido, sem o “X” vermelho lateral.
+- 51 kits divinos canônicos integrados.
+- Grupos sincronizados: 4 Triúnviros, 10 Dii Consentis, 10 Dii Inferi, 5 Alati, 5 Ventis e 17 Numina.
+- Minerva permanece sem kit.
+- Todas as passivas/ativas foram regeneradas a partir do texto consolidado do Guia.
+- Martírio Final é tratado como habilidade EXTRA, sem custo/nível falso.
+- Perícias do Guia atual foram sincronizadas; `Enganação` e `Estratégia` foram mantidas como referências customizadas porque aparecem explicitamente em kits divinos.
+- A penalidade cumulativa por retornar após 0 HP foi removida dos cálculos e da interface.
+- Corrigido o probe de `localStorage`, preservando save automático no navegador.
 
-## Arquivos importantes
-
-- `index.html` — ponto de entrada
-- `styles.css` — estilos (cache busting `v=4.4`)
-- `app.js` — lógica principal
-- `legio-mark-clean.png` — ícone ajustado do header
-
-Abra `index.html` para usar localmente. A ficha continua exportando/importando JSON normalmente.
+O schema do save permanece `v21`, evitando quebrar fichas existentes.
